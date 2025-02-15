@@ -13,4 +13,5 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+   publicDir: 'public', // Ensures Vite serves files from public/
 });
