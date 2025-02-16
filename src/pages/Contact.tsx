@@ -17,7 +17,7 @@ const socialLinks = [
     name: 'Email',
     url: 'mailto:your.email@example.com',
     icon: Mail,
-    color: 'hover:text-blue-600 hover:scale-110',
+    color: 'hover:text-red-600 hover:scale-110',
   },
   {
     name: 'LinkedIn',
