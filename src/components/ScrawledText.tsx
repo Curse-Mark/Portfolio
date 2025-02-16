@@ -67,7 +67,7 @@ export default function ScrawledText({ text, className = '' }: Props) {
         ))}
       </svg>
       <span className="opacity-0">{text}</span>
-      <span className="absolute top-0 left-0 font-handwriting">{text}</span>
+      <span className="absolute top-0 left-0">{text}</span>
     </motion.div>
   );
 }
