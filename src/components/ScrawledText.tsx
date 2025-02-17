@@ -1,73 +1,69 @@
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 
-interface Props {
-  text: string;
-  className?: string;
-}
-
-export default function ScrawledText({ text, className = '' }: Props) {
-  const [paths, setPaths] = useState<string[]>([]);
-
+const ScrawledText = ({ text, className, position = 'below' }) => {
+  const [drawn, setDrawn] = useState(false);
+  
   useEffect(() => {
-    // Create SVG paths for each character
-    const createPaths = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      ctx.font = '60px "Dancing Script"';
-      const newPaths: string[] = [];
-      let x = 0;
-
-      text.split('').forEach((char) => {
-        const metrics = ctx.measureText(char);
-        const width = metrics.width;
-        
-        // Create a wavy path for each character
-        const path = `M ${x} 0 
-                     Q ${x + width * 0.3} -10, ${x + width * 0.5} 0 
-                     T ${x + width} 0`;
-        newPaths.push(path);
-        x += width;
-      });
-
-      setPaths(newPaths);
-    };
-
-    createPaths();
-  }, [text]);
-
+    const timer = setTimeout(() => {
+      setDrawn(true);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  const pathVariants = {
+    hidden: { pathLength: 0, opacity: 0 },
+    visible: (i) => {
+      const delay = 1.5 + i * 0.5;
+      return {
+        pathLength: 1,
+        opacity: 1,
+        transition: {
+          pathLength: { delay, type: "spring", duration: 1.5, bounce: 0 },
+          opacity: { delay, duration: 0.01 }
+        }
+      };
+    }
+  };
+  
+  // Size the SVG based on the text length
+  const width = text.length * 20;
+  
   return (
-    <motion.div 
-      className={`relative inline-block ${className}`}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <svg
-        className="absolute top-0 left-0 w-full h-full"
-        style={{ overflow: 'visible' }}
-      >
-        {paths.map((path, index) => (
+    <div className={`relative inline-flex flex-col items-center ${className}`}>
+      <span className={position === 'below' ? 'mb-2' : 'mt-2'}>
+        {text}
+      </span>
+      {position === 'below' && (
+        <motion.svg
+          width={width}
+          height="15"
+          viewBox={`0 0 ${width} 15`}
+          initial="hidden"
+          animate={drawn ? "visible" : "hidden"}
+          className={`absolute ${position === 'below' ? 'top-full -mt-2' : 'bottom-full -mb-2'}`}
+        >
           <motion.path
-            key={index}
-            d={path}
-            stroke="currentColor"
+            d={`M5,5 Q${width/4},25 ${width/2},5 Q${width*3/4},-15 ${width-5},5`}
+            fill="transparent"
             strokeWidth="2"
-            fill="none"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{
-              duration: 2,
-              delay: index * 0.1,
-              ease: "easeInOut"
-            }}
+            stroke="currentColor"
+            className="text-brand-500"
+            variants={pathVariants}
+            custom={0}
           />
-        ))}
-      </svg>
-      <span className="opacity-0">{text}</span>
-      <span className="absolute top-0 left-0">{text}</span>
-    </motion.div>
+        </motion.svg>
+      )}
+    </div>
   );
-}
+};
+
+ScrawledText.propTypes = {
+  text: PropTypes.string.isRequired,
+  className: PropTypes.string,
+  position: PropTypes.oneOf(['below', 'above'])
+};
+
+export default ScrawledText;
